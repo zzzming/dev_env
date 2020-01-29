@@ -17,6 +17,11 @@
 #
 #  ---------------------------------------------------------------------------
 
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
 #   -------------------------------
 #   1.  ENVIRONMENT CONFIGURATION
 #   -------------------------------
@@ -274,13 +279,59 @@ httpHeaders () { /usr/bin/curl -I -L $@ ; }             # httpHeaders:      Grab
 #   9. Node and Brew developement 
 #   ---------------------------------------
 export NVM_DIR="$HOME/.nvm"
-. "/usr/local/opt/nvm/nvm.sh"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 #   ---------------------------------------
 #   10. GoLang development 
 #   ---------------------------------------
-export GOPATH=$HOME/mygo
-export PATH=$PATH:$GOPATH/bin
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
+
+# JSON
+alias json='python -mjson.tool'
+
+#   ----------------------------------------
+#   Java development
+#   ----------------------------------------
+source /etc/profile.d/maven.sh
+export JAVA_HOME=/usr/lib/jvm/jre-openjdk
+export JDK_HOME=/usr/lib/jvm/jre-openjdk
+PATH=$PATH:/opt/gradle/gradle-6.0.1/bin:/var/lib/snapd/snap/bin
+export PATH
+
+#   ----------------------------------------
+#   Erlang development
+#   ----------------------------------------
+PATH=$HOME/.cache/rebar3/bin:$PATH
+export PATH
+. $HOME/erl_otp/21.3/activate
+
+#   ----------------------------------------
+#   Kubenetes development
+#   ----------------------------------------
+alias k="kubectl"
+source <(kubectl completion bash | sed 's/kubectl/k/g')
+alias keg="kubectl exec -it"
+alias kl="kubectl logs"
+alias kp="kubectl get pod -o wide"
+alias kw="watch kubectl get pod"
+alias h="helm"
+alias kdump="kubectl get all -o yaml"
+alias kcc="kubectl config current-context"
+alias kgc="kubectl config get-contexts"
+alias kuc="kubectl config use-context"
+alias kuk="kubectl config use-context kubernetes-admin@kind"
+alias kapline="kubectl run -it --rm --restart=Never alpine --image=alpine sh"
+kcns() {
+    kubectl config set-context $(kubectl config current-context) --namespace="$@"
+}
+kem() {
+        kubectl get pod -l component=$1 --field-selector=status.phase=Running -o custom-columns=name:metadata.name --no-headers | xargs -I{} xargs sh -c "kubectl exec {} $2"
+}
+klm() {
+        kubectl get pod -l component=$1 --field-selector=status.phase=Running -o custom-columns=name:metadata.name --no-headers | xargs -I{} xargs sh -c "kubectl logs {} $2"
+}
 
 #   ---------------------------------------
 #   11.  REMINDERS & NOTES
